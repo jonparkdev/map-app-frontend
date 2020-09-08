@@ -1,23 +1,16 @@
 import { useEffect } from 'react'
 import { useDispatch } from 'react-redux'
+import { useRouter } from 'next/router'
 import Link from 'next/link'
-import { startClock } from '../actions'
-import Examples from '../components/examples'
 
 const Index = () => {
-  const dispatch = useDispatch()
-  useEffect(() => {
-    dispatch(startClock())
-  }, [dispatch])
+  const router = useRouter()
 
-  return (
-    <>
-      <Examples />
-      <Link href="/show-redux-state">
-        <a>Click to see current Redux State</a>
-      </Link>
-    </>
-  )
+  useEffect(() => {
+    router.push('/login')
+  }, [])
+
+  return null;
 }
 
 export default Index
