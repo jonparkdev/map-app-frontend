@@ -1,21 +1,45 @@
-import { reduxForm, Field, formValueSelector } from 'redux-form'
+import {
+  reduxForm,
+  Field,
+  formValueSelector,
+  initialize,
+  SubmissionError
+} from 'redux-form'
+import { get } from 'lodash'
 import { connect } from 'react-redux'
 import { useState, useEffect, useRef } from 'react'
 import { renderTextField } from '../../common/MaterialComponents'
-import { addLocation } from '../../../redux/actions'
+import {
+  addLocation,
+  updateLocation,
+  removeMarker,
+  deleteLocation
+} from '../../../redux/actions'
 import Loading from '../../common/Loading'
 
 const AddLocationForm = ({
   dispatch,
   selectedMarker,
   handleSubmit,
-  isLoading,
   location_name
 }) => {
-  const { location } = selectedMarker
+  // marker location information
+  const location = get(selectedMarker, 'location', null)
+  const locationID = get(selectedMarker, 'locationObject.id', null)
 
-  const [open, setOpen] = useState(false)
+  // flag to tell react to repaint on new marker selection
+  const locationRerender = get(location, [0], null)
+
+  // loading flag for async functions
+  const [loading, setLoading] = useState(false)
+  // ref is used for css transitions rather than repaint the component
   const containerRef = useRef()
+
+  useEffect(() => {
+    const location_name = get(selectedMarker.locationObject, 'name', '')
+    // on every new marker clicked reset form value
+    dispatch(initialize('location-form', { location_name }))
+  }, [locationRerender])
 
   // no location -> hide tray
   if(!location) {
@@ -23,8 +47,10 @@ const AddLocationForm = ({
   }
 
   // did the user click on old or new location
-  const newLocation = !selectedMarker.id
-  const title = "Location"
+  const newLocation = !selectedMarker.locationObject
+  // get name of location marker
+  const locationName = get(selectedMarker.locationObject, 'name', 'New Location')
+  // get Coordinated of marker
   const coordinates = `${location[0].toFixed(5)}, ${location[1].toFixed(5)}`
 
   // toggle tray
@@ -37,21 +63,52 @@ const AddLocationForm = ({
     }
   }
 
-  const submitForm = async () => {
-    const payload = {
-      name: location_name,
-      latitude: location[0],
-      longitude: location[1]
+  // submit for POST and PATCH requests
+  const submitForm = async (values) => {
+    setLoading(true)
+    if (!values.location_name) {
+      setLoading(false);
+      throw new SubmissionError({
+        location_name: 'Field cannot be blank',
+      });
     }
-    await dispatch(addLocation(payload))
+
+    if(newLocation) {  // adding new location
+      const payload = {
+        name: location_name,
+        latitude: location[0],
+        longitude: location[1]
+      }
+
+      await dispatch(addLocation(payload))
+    } else { // updating location
+      const payload = {
+        name: location_name,
+        locationID
+      }
+      await dispatch(updateLocation(payload))
+    }
+
+    setLoading(false);
+    dispatch(removeMarker())
   }
 
+  // callback to delete marker
+  const deleteMarker = () => {
+    setLoading(true)
+    const payload = {
+      locationID
+    }
+    dispatch(deleteLocation(payload))
+    setLoading(false);
+    dispatch(removeMarker())
+  }
 
   return (
     <div id="tray">
       <div className="header-container">
         <div className="header">
-          <div className="title"> {title} </div>
+          <div className="title"> {locationName} </div>
           <div className="location"> {coordinates} </div>
         </div>
         <button className='settings' onClick={() => toggle()} >
@@ -60,7 +117,6 @@ const AddLocationForm = ({
       </div>
       <div className="divider" />
       <form onSubmit={handleSubmit(submitForm)}>
-
         <Field
           name="location_name"
           label="Location Name"
@@ -68,18 +124,27 @@ const AddLocationForm = ({
           component={renderTextField}
           style={{width: '100%'}}
         />
-
         <div className='row'>
-          {!newLocation && (
-            <button
-              onClick={()=>console.log()}
-              style={{backgroundColor: 'red', marginLeft: 0}}
-            >
-              Delete
-            </button>
-          )}
-          {isLoading ? (
-            <Loading style={{marginLeft:'auto', transform: 'scale(.75)'}}/>
+          {!newLocation ? (
+            !loading ? (
+              <div
+                id="delete-button"
+                onClick={() => deleteMarker()}
+                style={{
+                  backgroundColor: 'red',
+                  marginLeft: 0,
+                  minWidth: 0
+                }}
+              >
+                Delete
+              </div>
+            ) : (
+              <Loading style={{marginLeft:'auto', transform: 'scale(.5)'}}/>
+            )
+          ) : null}
+
+          {loading ? (
+            <Loading style={{marginLeft:'auto', transform: 'scale(.5)'}}/>
           ) : (
             <button type="submit" >
               {`${newLocation ? 'Add' : 'Edit'} Location`}
@@ -116,7 +181,7 @@ const AddLocationForm = ({
             align-items: center;
           }
 
-          button {
+          button, #delete-button {
             cursor: pointer;
             margin-left: auto;
             color: white;
@@ -179,13 +244,12 @@ const AddLocationForm = ({
   )
 }
 
-export default reduxForm({
-  form: 'location-form'
-})(connect(state => {
+export default connect(state => {
   const selector = formValueSelector('location-form')
   return {
-    isLoading: state.auth.isLoading,
     location_name: selector(state, 'location_name'),
-    selectedMarker: state.locations.selectedMarker
+    selectedMarker: state.locations.selectedMarker,
   }
+})(reduxForm({
+  form: 'location-form',
 })(AddLocationForm))

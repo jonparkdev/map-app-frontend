@@ -39,8 +39,63 @@ class ApiService {
   addLocation(body, axiosConfig) {
     const { headers } = axiosConfig
 
-    console.log(body, headers)
     return this.axios.post('/api/locations/', body, {
+      headers
+    })
+  }
+
+  getUserLocations(axiosConfig) {
+    const { headers } = axiosConfig
+
+    return this.axios.get(`/api/locations`, {
+      headers
+    })
+  }
+
+  updateUserLocation(locationID, body, axiosConfig) {
+    const { headers } = axiosConfig
+
+    return this.axios.patch(`/api/locations/${locationID}/`, body, {
+      headers
+    })
+  }
+
+  updateUserLocation(locationID, body, axiosConfig) {
+    const { headers } = axiosConfig
+
+    return this.axios.patch(`/api/locations/${locationID}/`, body, {
+      headers
+    })
+  }
+
+  deleteLocation(locationID, axiosConfig) {
+    const { headers } = axiosConfig
+
+    return this.axios.delete(`/api/locations/${locationID}/`, {
+      headers
+    })
+  }
+
+  sendFriendRequest(body, axiosConfig) {
+    const { headers } = axiosConfig
+
+    return this.axios.post(`/api/friend-request`, body, {
+      headers
+    })
+  }
+
+  acceptFriendRequest(body, axiosConfig) {
+    const { headers } = axiosConfig
+
+    return this.axios.post(`/api/accept-friend-request`, body, {
+      headers
+    })
+  }
+
+  getFriendsLocations(body, axiosConfig) {
+    const { headers } = axiosConfig
+
+    return this.axios.get(`/api/friends-location-list`, {
       headers
     })
   }

@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react'
 import Map from './Map'
 import Logout from './MapComponents/Logout'
 import AddLocationForm from './MapComponents/AddLocationForm'
-//import SearchBox from '../MapComponents/SeachBox'
+import Share from './MapComponents/Share'
+import Friends from './MapComponents/Friends'
 
 const MapsContainer = () => {
 
@@ -12,6 +13,8 @@ const MapsContainer = () => {
         <Logout />
         <Map />
         <AddLocationForm />
+        <Share />
+        <Friends />
       </div>
       <style jsx>
         {`

@@ -1,22 +1,11 @@
 import ApiService from '../utils/ApiServices'
+import { tokenConfig } from './utils'
 
-// HELPER:  SET HEADER WITH AUTHORIZATION
-export const tokenConfig = (getState) => {
-  // Headers
-  const axiosConfig = {
-    headers: {
-      'Content-Type': 'application/json'
-    }
-  }
-
-  // If token exists add to header
-  const token = getState().auth.token
-  if(token){
-    axiosConfig.headers['Authorization'] = `Token ${token}`
-  }
-
-  return axiosConfig
-}
+/**
+ *
+ *  AUTH ACTIONS
+ *
+ */
 
 // GET USER ACTION CREATORS
 export const getUserFailure = (err) => {
@@ -137,6 +126,12 @@ export function createUser(payload) {
   }
 }
 
+/**
+ *
+ * LOCATION ACTIONS
+ *
+ */
+
 // SELECTED MARKER ACTION
 export const selectMarker = (payload) => {
   return {type: "SELECT_MARKER", payload }
@@ -158,7 +153,7 @@ export const addLocationSuccess = (payload) => {
   return { type: "ADD_LOCATION_SUCCESS", payload }
 }
 
-// ASYNC CREATE USER ACTION CREATOR
+// ASYNC CREATE LOCATION ACTION CREATOR
 export function addLocation(payload) {
   return async (dispatch, getState) => {
     dispatch(addLocationPending())
@@ -173,8 +168,198 @@ export function addLocation(payload) {
     try {
       const response = await ApiService.addLocation(body, axiosConfig)
       dispatch(addLocationSuccess(response.data))
+      await dispatch(getUserLocations())
     } catch (err) {
       dispatch(addLocationFailure())
     }
   }
 }
+
+// UPDATE LOCATION ACTION CREATOR
+export const updateLocationFailure = (err) => {
+  return { type: "UPDATE_LOCATION_FAIL" }
+}
+export const updateLocationPending = () => {
+  return { type: "UPDATE_LOCATION_PENDING" }
+}
+export const updateLocationSuccess = (payload) => {
+  return { type: "UPDATE_LOCATION_SUCCESS", payload }
+}
+
+// ASYNC UPDATE LOCATION ACTION CREATOR
+export function updateLocation({ name, locationID }) {
+  return async (dispatch, getState) => {
+    dispatch(updateLocationPending())
+    // Headers
+    const axiosConfig = tokenConfig(getState)
+
+    // Request Body
+    const body = JSON.stringify({ name })
+
+    try {
+      const response = ApiService.updateUserLocation(locationID, body, axiosConfig)
+      dispatch(updateLocationSuccess(response.data))
+      await dispatch(getUserLocations())
+    } catch (err) {
+      dispatch(updateLocationFailure())
+    }
+  }
+}
+
+// DELETE LOCATION ACTION CREATOR
+export const deleteLocationFailure = (err) => {
+  return { type: "DELETE_LOCATION_FAIL" }
+}
+export const deleteLocationPending = () => {
+  return { type: "DELETE_LOCATION_PENDING" }
+}
+export const deleteLocationSuccess = (payload) => {
+  return { type: "DELETE_LOCATION_SUCCESS", payload }
+}
+
+// ASYNC DELETE LOCATION ACTION CREATOR
+export function deleteLocation({ locationID }) {
+  return async (dispatch, getState) => {
+    dispatch(deleteLocationPending())
+
+    // Headers
+    const axiosConfig = tokenConfig(getState)
+
+    try {
+      const response = ApiService.deleteLocation(locationID, axiosConfig)
+      dispatch(deleteLocationSuccess(response.data))
+      await dispatch(getUserLocations())
+    } catch (err) {
+      dispatch(deleteLocationFailure())
+    }
+  }
+}
+
+// GET LOCATIONS ACTION CREATOR
+export const getUserLocationsFailure = (err) => {
+  return { type: "GET_LOCATIONS_FAIL" }
+}
+export const getUserLocationsPending = () => {
+  return { type: "GET_LOCATIONS_PENDING" }
+}
+export const getUserLocationsSuccess = (payload) => {
+  return { type: "GET_LOCATIONS_SUCCESS", payload }
+}
+
+// ASYNC RETRIEVE USER LOCATIONS
+export function getUserLocations(payload) {
+  return async (dispatch, getState) => {
+    dispatch(getUserLocationsPending())
+
+    // Headers
+    const axiosConfig = tokenConfig(getState)
+
+    try {
+      const response = await ApiService.getUserLocations(axiosConfig)
+      dispatch(getUserLocationsSuccess(response.data))
+    } catch (err) {
+      dispatch(getUserLocationsFailure())
+    }
+  }
+}
+
+// GET FRIENDS LOCATIONS ACTION CREATOR
+export const getFriendsLocationsFailure = (err) => {
+  return { type: "GET_FRIENDS_LOCATIONS_FAIL" }
+}
+export const getFriendsLocationsPending = () => {
+  return { type: "GET_FRIENDS_LOCATIONS_PENDING" }
+}
+export const getFriendsLocationsSuccess = (payload) => {
+  return { type: "GET_FRIENDS_LOCATIONS_SUCCESS", payload }
+}
+
+// ASYNC RETRIEVE USER LOCATIONS
+export function getFriendsLocations(payload) {
+  return async (dispatch, getState) => {
+    dispatch(getFriendsLocationsPending())
+
+    // Headers
+    const axiosConfig = tokenConfig(getState)
+
+    // body
+    const body = JSON.stringify(payload)
+
+    try {
+      const response = await ApiService.getFriendsLocations(body, axiosConfig)
+      console.log(response.data)
+      dispatch(getFriendsLocationsSuccess(response.data))
+    } catch (err) {
+      dispatch(getFriendsLocationsFailure())
+    }
+  }
+}
+
+/**
+ *
+ * SHARE REQUESTS
+ *
+ */
+
+ // SHARE LOCATIONS ACTION CREATOR
+ export const shareFailure = (err) => {
+   return { type: "SHARE_FAIL" }
+ }
+ export const sharePending = () => {
+   return { type: "SHARE_PENDING" }
+ }
+ export const shareSuccess = (payload) => {
+   return { type: "SHARE_SUCCESS", payload }
+ }
+
+ // ASYNC SHARE USER LOCATIONS
+ export function sendFriendRequest(payload) {
+   return async (dispatch, getState) => {
+     dispatch(sharePending())
+
+     // Headers
+     const axiosConfig = tokenConfig(getState)
+
+
+     // body
+     const body = JSON.stringify(payload)
+
+     try {
+       const response = await ApiService.sendFriendRequest(body, axiosConfig)
+       dispatch(shareSuccess(response.data))
+     } catch (err) {
+       dispatch(shareFailure())
+     }
+   }
+ }
+
+ // ACCEPT REQUEST ACTION CREATOR
+ export const acceptFailure = (err) => {
+   return { type: "SHARE_FAIL" }
+ }
+ export const acceptPending = () => {
+   return { type: "SHARE_PENDING" }
+ }
+ export const acceptSuccess = (payload) => {
+   return { type: "SHARE_SUCCESS", payload }
+ }
+
+ // ACCEPT USER LOCATIONS
+ export function acceptFriendRequest(payload) {
+   return async (dispatch, getState) => {
+     dispatch(acceptPending())
+
+     // Headers
+     const axiosConfig = tokenConfig(getState)
+
+     // body
+     const body = JSON.stringify(payload)
+
+     try {
+       const response = await ApiService.acceptFriendRequest(body, axiosConfig)
+       dispatch(acceptSuccess(response.data))
+     } catch (err) {
+       dispatch(acceptFailure())
+     }
+   }
+ }

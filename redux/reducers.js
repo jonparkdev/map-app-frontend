@@ -56,11 +56,31 @@ const authReducer = (state = initialAuthState, action) => {
 // INITIAL AUTH STATE
 const initialLocationState = {
   selectedMarker: {},
-  userLocations: []
+  userLocations: [],
+  friendLocations: [],
+  locationsLoading: false,
 }
 
 const locationsReducer = (state = initialLocationState, action) => {
   switch(action.type) {
+    case types.GET_LOCATIONS_PENDING:
+    case types.GET_FRIENDS_LOCATIONS_PENDING:
+      return {
+        ...state,
+        locationsLoading: true
+      }
+    case types.GET_FRIENDS_LOCATIONS_SUCCESS:
+      return {
+        ...state,
+        friendLocations: action.payload,
+        locationsLoading: false
+      }
+    case types.GET_LOCATIONS_SUCCESS:
+      return {
+        ...state,
+        userLocations: action.payload,
+        locationsLoading: false
+      }
     case types.SELECT_MARKER:
       return {
         ...state,
