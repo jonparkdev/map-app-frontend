@@ -11,7 +11,8 @@ import { getUserLocations, getFriendsLocations } from '../redux/actions'
 const MapsPage = ({
   isAuthenticated,
   dispatch,
-  user
+  user,
+  isLoading
 }) => {
   const router = useRouter()
 
@@ -19,17 +20,13 @@ const MapsPage = ({
     if(!isAuthenticated) {
       router.push('/login')
     } else {
-
-    const getLocations = async () => {
-      await dispatch(getUserLocations(user.id))
-      const friends = get(user, 'friends')
-      await dispatch(getFriendsLocations({ friends }))
-    }
-    getLocations()
-  }
-
-
-  }, [isAuthenticated])
+      const getLocations = async () => {
+        await dispatch(getUserLocations(user.id))
+        const friends = get(user, 'friends')
+        await dispatch(getFriendsLocations({ friends }))
+      }
+      getLocations()
+    }}, [isAuthenticated, isLoading])
 
   return (
     <>
@@ -50,5 +47,6 @@ MapsPage.propTypes = {
 
 export default connect(state => ({
   isAuthenticated: state.auth.isAuthenticated,
+  isLoading: state.auth.isLoading,
   user: state.auth.user
 }))(MapsPage)

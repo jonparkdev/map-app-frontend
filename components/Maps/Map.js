@@ -6,7 +6,7 @@ import PopupContent from './MapComponents/Popup'
 import { Provider, useDispatch } from 'react-redux'
 import { selectMarker, removeMarker } from '../../redux/actions'
 
-const Map = ({ dispatch, locations, isAuthenticated, userID }) => {
+const Map = ({ dispatch, locations, isAuthenticated, userID, isLoading }) => {
 
   const [selectedMarker, setSelectedMarker] = useState(null)
 
@@ -108,7 +108,7 @@ const Map = ({ dispatch, locations, isAuthenticated, userID }) => {
     )
     render(map, document.getElementById('mapid'))
 
-  }, [selectedMarker, locations.locationsLoading])
+  }, [selectedMarker, locations.locationsLoading, isLoading ])
 
    return (
      <>
@@ -136,5 +136,6 @@ const Map = ({ dispatch, locations, isAuthenticated, userID }) => {
 export default connect(state => ({
   locations: state.locations,
   isAuthenticated: state.auth.isAuthenticated,
+  isLoading: state.auth.isLoading,
   userID: state.auth.user.id
 }))(Map)
