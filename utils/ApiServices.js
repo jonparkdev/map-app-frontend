@@ -9,7 +9,7 @@ class ApiService {
       })
     } else {
       this.axios = axios.create({
-        baseURL: `${process.env.HOST_SERVER}`
+        baseURL: `${process.env.HOST_SERVER}/`
       })
     }
   }
