@@ -2,16 +2,16 @@ import axios from 'axios'
 
 class ApiService {
   constructor() {
-    if(process.env.PORT === "3000") {
-      const devPort = parseInt(process.env.PORT, 10) || 3000;
-      this.axios = axios.create({
-        baseURL: `http://localhost:${devPort}/`
-      })
-    } else {
-      this.axios = axios.create({
-        baseURL: `${process.env.HOST_SERVER}/`
-      })
-    }
+    if(process.env.NODE_ENV === "development") {
+        const devPort = parseInt(process.env.PORT, 10) || 3000;
+        this.axios = axios.create({
+          baseURL: `http://localhost:${devPort}/`
+        })
+      } else {
+        this.axios = axios.create({
+          baseURL: `https://maps.jonathanpark.ca/`
+        })
+      }
   }
 
   createUser(body, axiosConfig) {
