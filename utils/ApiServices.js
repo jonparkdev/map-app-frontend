@@ -2,10 +2,16 @@ import axios from 'axios'
 
 class ApiService {
   constructor() {
-    const devPort = parseInt(process.env.PORT, 10) || 3000;
-    this.axios = axios.create({
-      baseURL: `http://localhost:${devPort}/`
-    })
+    if(process.env.PORT === "3000") {
+      const devPort = parseInt(process.env.PORT, 10) || 3000;
+      this.axios = axios.create({
+        baseURL: `http://localhost:${devPort}/`
+      })
+    } else {
+      this.axios = axios.create({
+        baseURL: `${process.env.HOST_SERVER}`
+      })
+    }
   }
 
   createUser(body, axiosConfig) {
